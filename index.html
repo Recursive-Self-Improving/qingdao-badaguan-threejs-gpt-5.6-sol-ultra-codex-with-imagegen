@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#18332f" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <meta
+      name="description"
+      content="走進青島八大關的林蔭、紅瓦洋房與黃海岸線，一段可自由漫步的 Three.js 虛擬景觀。"
+    />
+    <title>青島八大關｜一場海風裡的漫步</title>
+  </head>
+  <body>
+    <main id="app">
+      <canvas id="scene" aria-label="青島八大關互動虛擬景觀"></canvas>
+
+      <div id="loading" class="loading-screen" aria-live="polite">
+        <div class="loading-mark" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </div>
+        <p>海風正穿過林蔭</p>
+        <div class="loading-track"><i id="loading-bar"></i></div>
+        <small id="loading-value">0%</small>
+      </div>
+
+      <section id="intro" class="intro is-hidden" aria-labelledby="intro-title">
+        <div class="intro-grain"></div>
+        <div class="intro-kicker"><span></span>36.052° N · 120.350° E</div>
+        <div class="intro-copy">
+          <p class="eyebrow">QINGDAO · COASTAL WALK 01</p>
+          <h1 id="intro-title"><span>青島</span>八大關</h1>
+          <p class="intro-subtitle">樹影、紅瓦與海風，<br />在午後四點四十五分相遇。</p>
+          <button id="enter-button" class="enter-button" type="button">
+            <span>開始漫步</span>
+            <i aria-hidden="true">↗</i>
+          </button>
+        </div>
+        <div class="intro-note">
+          <span>01</span>
+          <p>一段取材自八大關建築與海岸意象的互動景觀</p>
+        </div>
+        <div class="scroll-cue" aria-hidden="true"><i></i><span>ENTER</span></div>
+      </section>
+
+      <div id="hud" class="hud is-hidden">
+        <header class="topbar">
+          <div class="brand">
+            <div class="brand-seal">八</div>
+            <div>
+              <strong>八大關</strong>
+              <span>BADAGUAN · QINGDAO</span>
+            </div>
+          </div>
+          <div class="top-actions">
+            <button id="audio-button" class="icon-button" type="button" aria-label="開啟環境聲音" title="環境聲音">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4Zm12.5-.7a5 5 0 0 1 0 7.4M19 6a8 8 0 0 1 0 12"/></svg>
+              <span>聲景</span>
+            </button>
+            <button id="map-button" class="icon-button" type="button" aria-label="打開漫遊地圖" title="漫遊地圖">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 6 5-2 8 3 5-2v13l-5 2-8-3-5 2V6Zm5-2v13m8-10v13"/></svg>
+              <span>地圖</span>
+            </button>
+            <button id="help-button" class="icon-button" type="button" aria-label="打開操作說明" title="操作說明">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.8 9a2.4 2.4 0 1 1 3.8 2c-1 .7-1.6 1-1.6 2.4M12 17h.01"/></svg>
+              <span>操作</span>
+            </button>
+          </div>
+        </header>
+
+        <div id="location-chip" class="location-chip">
+          <span class="location-index">01</span>
+          <div><strong id="location-name">林蔭大道</strong><small id="location-caption">梧桐把午後的光剪成細碎金箔</small></div>
+        </div>
+
+        <div class="compass" aria-label="羅盤">
+          <div class="compass-track" id="compass-track">
+            <span>W</span><i>·</i><span>NW</span><i>·</i><strong>N</strong><i>·</i><span>NE</span><i>·</i><span>E</span>
+          </div>
+          <b></b>
+        </div>
+
+        <div class="reticle" aria-hidden="true"><i></i></div>
+
+        <aside class="conditions" aria-label="場景資訊">
+          <div><span>LOCAL TIME</span><strong>16:45</strong></div>
+          <div><span>SEA BREEZE</span><strong>3.2<small> m/s</small></strong></div>
+          <div class="weather-mark" aria-hidden="true"><i></i><i></i><i></i></div>
+        </aside>
+
+        <div id="prompt" class="prompt" aria-live="polite">
+          <kbd>E</kbd><span>細看這裡</span>
+        </div>
+
+        <div id="control-hint" class="control-hint">
+          <div class="mouse-icon" aria-hidden="true"><i></i></div>
+          <p><strong>W A S D</strong> 移動<span></span><strong>滑鼠</strong> 環視<span></span><strong>Shift</strong> 快走</p>
+          <small>按 ESC 釋放游標</small>
+        </div>
+
+        <button id="resume-button" class="resume-button" type="button">
+          <span>點擊畫面繼續漫步</span><small>CLICK TO RESUME</small>
+        </button>
+
+        <div class="touch-controls" aria-hidden="true">
+          <div id="joystick" class="joystick"><i id="joystick-knob"></i></div>
+          <span>拖曳右側環視</span>
+        </div>
+      </div>
+
+      <dialog id="map-dialog" class="panel-dialog">
+        <button class="dialog-close" type="button" aria-label="關閉">×</button>
+        <p class="panel-eyebrow">WALKING MAP · 八大關南部</p>
+        <h2>在樹影與海之間</h2>
+        <div class="map-layout">
+          <div class="map-graphic">
+            <div class="map-sea"><span>黃 海</span><i></i><i></i><i></i></div>
+            <div class="map-road main-road"></div>
+            <div class="map-road cross-road one"></div>
+            <div class="map-road cross-road two"></div>
+            <button class="map-pin is-active" data-target="avenue" style="--x:50%;--y:26%"><i></i><span>林蔭大道</span></button>
+            <button class="map-pin" data-target="princess" style="--x:70%;--y:46%"><i></i><span>公主樓</span></button>
+            <button class="map-pin" data-target="huashi" style="--x:29%;--y:62%"><i></i><span>花石樓</span></button>
+            <button class="map-pin" data-target="coast" style="--x:50%;--y:82%"><i></i><span>海岸眺望</span></button>
+            <div id="map-player" class="map-player" style="--x:50%;--y:30%"></div>
+          </div>
+          <div class="map-copy">
+            <span>建議路線 · 6 MIN</span>
+            <p>沿著林蔭一路向海。別墅藏在院牆後，花石樓的塔尖會先從樹冠間出現。</p>
+            <small>點選地標可快速前往</small>
+          </div>
+        </div>
+      </dialog>
+
+      <dialog id="help-dialog" class="panel-dialog compact-dialog">
+        <button class="dialog-close" type="button" aria-label="關閉">×</button>
+        <p class="panel-eyebrow">HOW TO WALK</p>
+        <h2>慢一點，聽海風</h2>
+        <div class="key-grid">
+          <div><kbd>W A S D</kbd><span>前後左右移動</span></div>
+          <div><kbd>滑鼠</kbd><span>轉動視角</span></div>
+          <div><kbd>SHIFT</kbd><span>快走</span></div>
+          <div><kbd>E</kbd><span>閱讀地標故事</span></div>
+          <div><kbd>M</kbd><span>開啟地圖</span></div>
+          <div><kbd>ESC</kbd><span>釋放游標</span></div>
+        </div>
+      </dialog>
+
+      <aside id="story-card" class="story-card" role="dialog" aria-modal="true" aria-labelledby="story-title" aria-describedby="story-body" aria-hidden="true" tabindex="-1">
+        <button id="story-close" type="button" aria-label="關閉">×</button>
+        <span id="story-number">01 / 04</span>
+        <p id="story-eyebrow">LANDMARK</p>
+        <h2 id="story-title">花石樓</h2>
+        <p id="story-body"></p>
+        <div class="story-meta"><span id="story-style">花崗岩 · 1930s</span><i></i></div>
+      </aside>
+
+      <div id="toast" class="toast" role="status"></div>
+    </main>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
